@@ -1,5 +1,5 @@
 use crate::infra::Problem;
-use text_io::scan;
+use crate::parse;
 
 pub struct Day2;
 
@@ -11,7 +11,8 @@ impl Problem<String, String, usize, usize> for Day2 {
         contents
             .lines()
             .map(|line| {
-                let (min, max, letter, password) = parse(line);
+                let (min, max, letter, password): (usize, usize, char, String) =
+                    parse!(r"(.+)-(.+) (.): (.+)", line, 4);
                 let count = password.matches(letter).count();
                 min <= count && count <= max
             })
@@ -22,17 +23,12 @@ impl Problem<String, String, usize, usize> for Day2 {
         contents
             .lines()
             .map(|line| {
-                let (min, max, letter, password) = parse(line);
+                let (min, max, letter, password): (usize, usize, char, String) =
+                    parse!(r"(.+)-(.+) (.): (.+)", line, 4);
                 (password.chars().nth(min - 1) == Some(letter))
                     ^ (password.chars().nth(max - 1) == Some(letter))
             })
             .filter(|a| *a)
             .count()
     }
-}
-
-fn parse(line: &str) -> (usize, usize, char, String) {
-    let (min, max, letter, password): (usize, usize, char, String);
-    scan!(line.bytes() => "{}-{} {}: {}", min, max, letter, password);
-    (min, max, letter, password)
 }

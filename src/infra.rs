@@ -76,3 +76,107 @@ pub fn run_day<P, I1, I2, R1, R2, IP1, IP2>(
         println!("{:?} ({:?} and {:?})", t1 + t2, t1, t2);
     }
 }
+
+#[macro_export]
+macro_rules! parse {
+    ($p:literal, $t:ident, $n:tt) => ({
+        lazy_static::lazy_static! {
+            static ref RE: regex::Regex = regex::Regex::new($p).unwrap();
+        }
+        let captures = RE.captures($t).unwrap();
+        parse!(@result, captures, $n)
+    });
+    (@result, $c:ident, 1) => (
+        ($c[1].parse().unwrap())
+    );
+    (@result, $c:ident, 2) => (
+        (
+            $c[1].parse().unwrap(),
+            $c[2].parse().unwrap(),
+        )
+    );
+    (@result, $c:ident, 3) => (
+        (
+            $c[1].parse().unwrap(),
+            $c[2].parse().unwrap(),
+            $c[3].parse().unwrap(),
+        )
+    );
+    (@result, $c:ident, 4) => (
+        (
+            $c[1].parse().unwrap(),
+            $c[2].parse().unwrap(),
+            $c[3].parse().unwrap(),
+            $c[4].parse().unwrap(),
+        )
+    );
+    (@result, $c:ident, 5) => (
+        (
+            $c[1].parse().unwrap(),
+            $c[2].parse().unwrap(),
+            $c[3].parse().unwrap(),
+            $c[4].parse().unwrap(),
+            $c[5].parse().unwrap(),
+        )
+    );
+    (@result, $c:ident, 6) => (
+        (
+            $c[1].parse().unwrap(),
+            $c[2].parse().unwrap(),
+            $c[3].parse().unwrap(),
+            $c[4].parse().unwrap(),
+            $c[5].parse().unwrap(),
+            $c[6].parse().unwrap(),
+        )
+    );
+    (@result, $c:ident, 7) => (
+        (
+            $c[1].parse().unwrap(),
+            $c[2].parse().unwrap(),
+            $c[3].parse().unwrap(),
+            $c[4].parse().unwrap(),
+            $c[5].parse().unwrap(),
+            $c[6].parse().unwrap(),
+            $c[7].parse().unwrap(),
+        )
+    );
+    (@result, $c:ident, 8) => (
+        (
+            $c[1].parse().unwrap(),
+            $c[2].parse().unwrap(),
+            $c[3].parse().unwrap(),
+            $c[4].parse().unwrap(),
+            $c[5].parse().unwrap(),
+            $c[6].parse().unwrap(),
+            $c[7].parse().unwrap(),
+            $c[8].parse().unwrap(),
+        )
+    );
+    (@result, $c:ident, 9) => (
+        (
+            $c[1].parse().unwrap(),
+            $c[2].parse().unwrap(),
+            $c[3].parse().unwrap(),
+            $c[4].parse().unwrap(),
+            $c[5].parse().unwrap(),
+            $c[6].parse().unwrap(),
+            $c[7].parse().unwrap(),
+            $c[8].parse().unwrap(),
+            $c[9].parse().unwrap(),
+        )
+    );
+    (@result, $c:ident, 10) => (
+        (
+            $c[1].parse().unwrap(),
+            $c[2].parse().unwrap(),
+            $c[3].parse().unwrap(),
+            $c[4].parse().unwrap(),
+            $c[5].parse().unwrap(),
+            $c[6].parse().unwrap(),
+            $c[7].parse().unwrap(),
+            $c[8].parse().unwrap(),
+            $c[9].parse().unwrap(),
+            $c[10].parse().unwrap(),
+        )
+    );
+}
