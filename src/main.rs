@@ -23,5 +23,11 @@ fn main() {
         (FromFile("day2.txt"), 708)
     );
 
-    day3::main();
+    run_day(
+        day,
+        1,
+        day3::Day3,
+        (FromFile("day3.txt"), 216),
+        (FromFile("day3.txt"), 6708199680),
+    );
 }
