@@ -1,6 +1,4 @@
 use crate::infra::Problem;
-use regex::Regex;
-use std::collections::HashMap;
 
 pub struct Day4;
 
@@ -9,72 +7,87 @@ impl Problem<String, String, usize, usize> for Day4 {
         4
     }
     fn first(contents: String) -> usize {
-        contents
-            .split("\r\n\r\n")
-            .map(|p| {
-                p.split_whitespace()
-                    .map(|x| x.split(':').take(2).collect::<Vec<_>>())
-                    .map(|v| (v[0], v[1]))
-                    .collect::<HashMap<_, _>>()
-            })
-            .filter(|m| m.len() == 8 || m.len() == 7 && !m.contains_key("cid"))
-            .count()
+        return do_it(contents, |k, _| match k {
+            b"byr" => 0b0000001,
+            b"iyr" => 0b0000010,
+            b"eyr" => 0b0000100,
+            b"hgt" => 0b0001000,
+            b"hcl" => 0b0010000,
+            b"ecl" => 0b0100000,
+            b"pid" => 0b1000000,
+            _ => 0,
+        });
     }
     fn second(contents: String) -> usize {
-        let hcl_regex = Regex::new("^#[0-9a-f]{6}$").unwrap();
-        let pid_regex = Regex::new("^[0-9]{9}$").unwrap();
-        let passports = contents
-            .split("\r\n\r\n")
-            .map(|p| {
-                p.split_whitespace()
-                    .map(|x| x.split(':').take(2).collect::<Vec<_>>())
-                    .map(|v| (v[0], v[1]))
-                    .collect::<HashMap<_, _>>()
-            })
-            .map(|m| -> Option<bool> {
-                Some(
-                    {
-                        // byr (Birth Year) - four digits; at least 1920 and at most 2002.
-                        let byr = m.get("byr")?.parse::<u32>().ok()?;
-                        byr >= 1920 && byr <= 2002
-                    } && {
-                        // iyr (Issue Year) - four digits; at least 2010 and at most 2020.
-                        let iyr = m.get("iyr")?.parse::<u32>().ok()?;
-                        iyr >= 2010 && iyr <= 2020
-                    } && {
-                        // eyr (Expiration Year) - four digits; at least 2020 and at most 2030.
-                        let eyr = m.get("eyr")?.parse::<u32>().ok()?;
-                        eyr >= 2020 && eyr <= 2030
-                    } && {
-                        // hgt (Height) - a number followed by either cm or in:
-                        //     If cm, the number must be at least 150 and at most 193.
-                        //     If in, the number must be at least 59 and at most 76.
-                        if let Some(hgt) = m.get("hgt")?.strip_suffix("cm") {
-                            let hgt = hgt.parse::<u32>().ok()?;
-                            hgt >= 150 && hgt <= 193
-                        } else if let Some(hgt) = m.get("hgt")?.strip_suffix("in") {
-                            let hgt = hgt.parse::<u32>().ok()?;
-                            hgt >= 59 && hgt <= 76
-                        } else {
-                            false
-                        }
-                    } && {
-                        // hcl (Hair Color) - a # followed by exactly six characters 0-9 or a-f.
-                        hcl_regex.is_match(m.get("hcl")?)
-                    } && {
-                        // ecl (Eye Color) - exactly one of: amb blu brn gry grn hzl oth.
-                        match *m.get("ecl")? {
-                            "amb" | "blu" | "brn" | "gry" | "grn" | "hzl" | "oth" => true,
-                            _ => false,
-                        }
-                    } && {
-                        // pid (Passport ID) - a nine-digit number, including leading zeroes.
-                        pid_regex.is_match(m.get("pid")?)
-                    },
-                )
-            })
-            .filter(|x| x.unwrap_or(false))
-            .collect::<Vec<_>>();
-        passports.len()
+        do_it(contents, |k, v| match k {
+            b"byr" if btwn(v, b"1920", b"2002") => 0b0000001,
+            b"iyr" if btwn(v, b"2010", b"2020") => 0b0000010,
+            b"eyr" if btwn(v, b"2020", b"2030") => 0b0000100,
+            b"hgt" if v.ends_with(b"cm") && btwn(v, b"150cm", b"193cm") => 0b0001000,
+            b"hgt" if v.ends_with(b"in") && btwn(v, b"59cm", b"76cm") => 0b0001000,
+            b"hcl"
+                if v[0] == b'#'
+                    && v.len() == 7
+                    && v[1..]
+                        .iter()
+                        .all(|&b| btwn(b, b'0', b'9') || btwn(b, b'a', b'f')) =>
+            {
+                0b0010000
+            }
+            b"ecl" => match v {
+                b"amb" | b"blu" | b"brn" | b"gry" | b"grn" | b"hzl" | b"oth" => 0b0100000,
+                _ => 0,
+            },
+            b"pid" if v.len() == 9 && v.iter().all(|&b| btwn(b, b'0', b'9')) => 0b1000000,
+            _ => 0,
+        })
     }
+}
+
+fn btwn<T1: PartialOrd<T2>, T2>(v: T1, min: T2, max: T2) -> bool {
+    v >= min && v <= max
+}
+
+#[derive(Debug)]
+enum S<'a> {
+    Key(usize),
+    Value(&'a [u8], usize),
+    Space,
+    NewLine,
+}
+
+fn do_it<F: Fn(&[u8], &[u8]) -> u8>(contents: String, f: F) -> usize {
+    let bytes = contents.as_bytes();
+
+    let mut s = S::Key(0);
+    let mut m = 0;
+    let mut r = 0;
+    for (i, b) in bytes.iter().enumerate() {
+        s = match (s, b) {
+            (S::Key(s), b':') => S::Value(&bytes[s..i], i + 1),
+            (S::Value(k, s), b' ') => {
+                m |= f(k, &bytes[s..i]);
+                S::Space
+            }
+            (S::Value(k, s), b'\n') => {
+                m |= f(k, &bytes[s..i]);
+                S::NewLine
+            }
+            (s @ S::Key(_), _) | (s @ S::Value(_, _), _) => s,
+            (S::Space, b'\n') => S::NewLine,
+            (S::NewLine, b' ') | (S::Space, b' ') => S::Space,
+            (S::NewLine, b'\n') => {
+                if (m & 0b1111111) == 0b1111111 {
+                    r += 1
+                }
+                m = 0;
+                S::NewLine
+            }
+            (S::Space, _) | (S::NewLine, _) => S::Key(i),
+        }
+    }
+    if (m & 0b1111111) == 0b1111111 {
+        return r + 1;
+    }
+    r
 }
