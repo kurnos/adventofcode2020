@@ -1,5 +1,7 @@
 use crate::infra::Problem;
+use bit_set::BitSet;
 use std::convert::TryInto;
+use std::iter::FromIterator;
 
 pub struct Day5;
 
@@ -13,14 +15,12 @@ impl Problem<String, String, u16, u16> for Day5 {
     }
 
     fn second(contents: String) -> u16 {
-        let mut xs = contents.lines().map(parse).collect::<Vec<_>>();
-        xs.sort();
-        for i in 1..xs.len() {
-            if xs[i] - xs[i - 1] == 2 {
-                return xs[i] - 1;
-            }
-        }
-        0
+        let xs: BitSet<u32> = BitSet::from_iter(contents.lines().map(parse).map(u16::into));
+        (0usize..1024)
+            .skip_while(|&i| !xs.contains(i))
+            .filter(|&i| !xs.contains(i))
+            .nth(0)
+            .unwrap() as u16
     }
 }
 
