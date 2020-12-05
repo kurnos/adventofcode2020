@@ -22,7 +22,7 @@ fn main() {
         1,
         day2::Day2,
         (FromFile("day2.txt"), 519),
-        (FromFile("day2.txt"), 708)
+        (FromFile("day2.txt"), 708),
     );
 
     run_day(
