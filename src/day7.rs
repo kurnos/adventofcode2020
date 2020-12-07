@@ -1,5 +1,5 @@
 use crate::infra::Problem;
-use std::collections::{HashMap, HashSet};
+use std::collections::{HashMap, HashSet, VecDeque};
 
 pub struct Day7;
 
@@ -9,64 +9,63 @@ impl Problem<String, String, usize, u32> for Day7 {
     }
 
     fn first(contents: String) -> usize {
-        let x = parse_bags(&contents);
+        let mut containers_of: HashMap<&str, Vec<&str>> = HashMap::new();
+        parse_bags(&contents, |container, _, contained| {
+            containers_of
+                .entry(contained)
+                .or_insert_with(Vec::new)
+                .push(container);
+        });
 
-        let mut can_hold_gold = HashSet::new();
-        can_hold_gold.insert("shiny gold");
-
-        let mut changed = true;
-        while changed {
-            changed = false;
-            for bag in &x {
-                if bag.1.keys().any(|k| can_hold_gold.contains(k)) {
-                    changed |= can_hold_gold.insert(bag.0);
-                }
+        let mut seen = HashSet::new();
+        let mut queue = VecDeque::new();
+        queue.push_back("shiny gold");
+        while let Some(bag) = queue.pop_front() {
+            if seen.insert(bag) {
+                containers_of
+                    .get(bag)
+                    .map(|containers| containers.iter().for_each(|c| queue.push_back(c)));
             }
         }
-        can_hold_gold.len() - 1
+        seen.len() - 1
     }
 
     fn second(contents: String) -> u32 {
-        let x = parse_bags(&contents);
+        let mut bags = HashMap::new();
 
-        let mut total_count = 0;
-        let mut counts = HashMap::new();
-        counts.insert("shiny gold", 1u32);
+        parse_bags(&contents, |container, count, contained| {
+            bags.entry(container)
+                .or_insert_with(Vec::new)
+                .push((contained, count));
+        });
 
-        while !counts.is_empty() {
-            let mut new_counts: HashMap<&str, u32> = HashMap::new();
-            for (b, c) in &counts {
-                for (b2, c2) in x[b].iter() {
-                    *new_counts.entry(b2).or_insert(0) += c * c2;
-                }
+        let mut total_count = 0u32;
+        let mut queue = vec![("shiny gold", 1u32)];
+
+        while let Some((bag, count)) = queue.pop() {
+            for &(contained, inner_count) in bags.get(&bag).unwrap_or(&vec![]) {
+                total_count += count * inner_count;
+                queue.push((contained, count * inner_count));
             }
-            total_count += new_counts.values().sum::<u32>();
-            counts = new_counts;
         }
         total_count
     }
 }
 
-fn parse_bags(contents: &str) -> HashMap<&str, HashMap<&str, u32>> {
-    contents
-        .lines()
-        .map(|line| {
-            let mut x = line.splitn(2, " contain ");
-            (
-                x.next().unwrap().rsplitn(2, " ").nth(1).unwrap(),
-                x.next()
-                    .unwrap()
-                    .split(", ")
-                    .filter_map(|y| {
-                        let mut d = y.splitn(2, ' ');
-                        d.next()
-                            .unwrap()
-                            .parse::<u32>()
-                            .ok()
-                            .map(|n| (d.next().unwrap().rsplitn(2, " ").nth(1).unwrap(), n))
-                    })
-                    .collect(),
-            )
-        })
-        .collect()
+fn parse_bags<'a>(contents: &'a str, mut visitor: impl FnMut(&'a str, u32, &'a str)) {
+    contents.lines().for_each(|line| {
+        let mut x = line.splitn(2, " bags contain ");
+        let container = x.next().unwrap();
+        x.next()
+            .unwrap()
+            .split(", ")
+            .filter_map(|y| {
+                let mut d = y.splitn(2, ' ');
+                Some((
+                    d.next()?.parse::<u32>().ok()?,
+                    d.next()?.rsplitn(2, " ").nth(1)?,
+                ))
+            })
+            .for_each(|(count, contained)| visitor(container, count, contained));
+    });
 }
