@@ -6,10 +6,11 @@ mod day3;
 mod day4;
 mod day5;
 mod day6;
+mod day7;
 mod infra;
 
 fn main() {
-    let day = Some(6u8);
+    let day = Some(7);
     run_day(
         day,
         1,
@@ -56,5 +57,13 @@ fn main() {
         day6::Day6,
         (FromFile("day6.txt"), 6782),
         (FromFile("day6.txt"), 3596),
+    );
+
+    run_day(
+        day,
+        1,
+        day7::Day7,
+        (FromFile("day7.txt"), 128),
+        (FromFile("day7.txt"), 20189),
     );
 }
