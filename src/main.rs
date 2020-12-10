@@ -1,6 +1,7 @@
 use infra::{run_day, FromFile};
 
 mod day1;
+mod day10;
 mod day2;
 mod day3;
 mod day4;
@@ -12,7 +13,7 @@ mod day9;
 mod infra;
 
 fn main() {
-    let day = Some(9);
+    let day = Some(10);
     run_day(
         day,
         1,
@@ -83,5 +84,13 @@ fn main() {
         day9::Day9,
         (FromFile("day9.txt"), 36845998),
         (FromFile("day9.txt"), 4830226),
+    );
+
+    run_day(
+        day,
+        1,
+        day10::Day10,
+        (FromFile("day10.txt"), 2263),
+        (FromFile("day10.txt"), 396857386627072),
     );
 }
