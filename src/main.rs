@@ -10,10 +10,11 @@ mod day07;
 mod day08;
 mod day09;
 mod day10;
+mod day11;
 mod infra;
 
 fn main() {
-    let day = Some(10);
+    let day = Some(11);
     run_day(
         day,
         1,
@@ -92,5 +93,13 @@ fn main() {
         day10::Day10,
         (FromFile("day10.txt"), 2263),
         (FromFile("day10.txt"), 396857386627072),
+    );
+
+    run_day(
+        day,
+        1,
+        day11::Day11,
+        (FromFile("day11.txt"), 2361),
+        (FromFile("day11.txt"), 2119),
     );
 }
