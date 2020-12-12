@@ -1,10 +1,7 @@
 use crate::infra::Problem;
-use std::collections::HashMap;
+use std::convert::TryInto;
 
 pub struct Day11;
-
-type Pos = (usize, usize);
-type Map = HashMap<Pos, S>;
 
 impl Problem<String, String, usize, usize> for Day11 {
     fn day() -> u8 {
@@ -12,115 +9,109 @@ impl Problem<String, String, usize, usize> for Day11 {
     }
 
     fn first(contents: String) -> usize {
-        asdf(parse(&contents), 4, |map, pos| {
-            let mut res = 0;
-            for &dx in &[-1isize, 0, 1] {
-                for &dy in &[-1isize, 0, 1] {
-                    if (dx, dy) != (0, 0) {
-                        let mut p = pos.clone();
-                        p.0 = ((p.0 as isize) + dx) as usize;
-                        p.1 = ((p.1 as isize) + dy) as usize;
-                        if let Some(S::Occupied) = map.get(&p) {
-                            res += 1;
-                        }
-                    }
-                }
+        let (dim, map) = parse(&contents);
+        let neighbours = neighbour_list(&map, |pos: usize, dx: i8, dy: i8| {
+            let (x, y) = (
+                (pos % dim as usize) as i8 + dx,
+                (pos / dim as usize) as i8 + dy,
+            );
+            if 0 <= x && x < dim && 0 <= y && y < dim {
+                x as u16 + y as u16 * dim as u16
+            } else {
+                0xffff
             }
-            res
-        })
+        });
+        room_of_life(map, 4, &neighbours)
     }
 
     fn second(contents: String) -> usize {
-        asdf(parse(&contents), 5, |map, pos| {
-            let mut res = 0;
-            for &dx in &[-1isize, 0, 1] {
-                for &dy in &[-1isize, 0, 1] {
-                    if (dx, dy) != (0, 0) {
-                        let mut p = pos.clone();
-                        loop {
-                            p.0 = ((p.0 as isize) + dx) as usize;
-                            p.1 = ((p.1 as isize) + dy) as usize;
-                            match map.get(&p) {
-                                None => {
-                                    break;
-                                }
-                                Some(S::Occupied) => {
-                                    res += 1;
-                                    break;
-                                }
-                                Some(S::Empty) => {
-                                    break;
-                                }
-                                _ => {}
-                            }
+        let (dim, map) = parse(&contents);
+        let neighbours = neighbour_list(&map, |pos: usize, dx: i8, dy: i8| {
+            let (mut x, mut y) = ((pos % dim as usize) as i8, (pos / dim as usize) as i8);
+            loop {
+                x += dx;
+                y += dy;
+
+                if 0 <= x && x < dim && 0 <= y && y < dim {
+                    match map[x as usize + y as usize * dim as usize] {
+                        b'#' | b'L' => {
+                            return x as u16 + y as u16 * dim as u16;
                         }
+                        _ => {}
                     }
+                } else {
+                    return 0xffff;
                 }
             }
-            res
-        })
+        });
+        room_of_life(map, 5, &neighbours)
     }
 }
 
-fn asdf(mut map: Map, limit: u8, f: impl Fn(&Map, Pos) -> u8) -> usize {
-    let mp = (
-        map.keys().map(|x| x.0).max().unwrap(),
-        map.keys().map(|x| x.1).max().unwrap(),
-    );
+fn neighbour_list(map: &[u8], can_see_in_dir: impl Fn(usize, i8, i8) -> u16) -> Vec<[u16; 8]> {
+    (0..map.len())
+        .map(|pos| {
+            [
+                can_see_in_dir(pos, -1, -1),
+                can_see_in_dir(pos, -1, 0),
+                can_see_in_dir(pos, -1, 1),
+                can_see_in_dir(pos, 0, -1),
+                can_see_in_dir(pos, 0, 1),
+                can_see_in_dir(pos, 1, -1),
+                can_see_in_dir(pos, 1, 0),
+                can_see_in_dir(pos, 1, 1),
+            ]
+        })
+        .collect()
+}
 
-    let mut changed = true;
-    while changed {
-        let mut next_map = Map::new();
-        changed = false;
-        for i in 1..=mp.0 {
-            for j in 1..=mp.1 {
-                let pos = (i, j);
-                next_map.insert(
-                    pos,
-                    match (map.get(&pos).unwrap(), f(&map, pos)) {
-                        (S::Empty, 0) => {
-                            changed = true;
-                            S::Occupied
-                        }
-                        (S::Occupied, n) if n >= limit => {
-                            changed = true;
-                            S::Empty
-                        }
-                        (t, _) => *t,
-                    },
-                );
-            }
+fn count(map: &[u8], neighbours: &[u16; 8]) -> u8 {
+    let mut res = 0;
+    for &p in neighbours {
+        if p != 0xffff && map[p as usize] == b'#' {
+            res += 1;
         }
-        map = next_map;
     }
-    map.values()
-        .filter(|x| if let S::Occupied = x { true } else { false })
-        .count()
-}
-
-#[derive(Debug, Copy, Clone)]
-enum S {
-    Floor,
-    Empty,
-    Occupied,
-}
-
-fn parse(contents: &str) -> Map {
-    let res = contents
-        .lines()
-        .enumerate()
-        .flat_map(|(row, line)| {
-            line.chars().enumerate().map(move |(i, c)| {
-                (
-                    (row + 1, i + 1),
-                    match c {
-                        '.' => S::Floor,
-                        'L' => S::Empty,
-                        _ => panic!(),
-                    },
-                )
-            })
-        })
-        .collect();
     res
+}
+
+fn room_of_life(map: Vec<u8>, limit: u8, neighbours: &[[u16; 8]]) -> usize {
+    let mut changed = true;
+    let (mut tick, mut tock) = (map.clone(), map);
+    while changed {
+        changed = false;
+        for (p, &b) in tick.iter().enumerate() {
+            tock[p as usize] = match b {
+                b'L' if count(&tick, &neighbours[p]) == 0 => {
+                    changed = true;
+                    b'#'
+                }
+                b'#' if count(&tick, &neighbours[p]) >= limit => {
+                    changed = true;
+                    b'L'
+                }
+                t => t,
+            };
+        }
+        {
+            let tmp = tock;
+            tock = tick;
+            tick = tmp;
+        }
+    }
+    tock.into_iter().filter(|&b| b == b'#').count()
+}
+
+fn parse(contents: &str) -> (i8, Vec<u8>) {
+    let mut width = contents.lines().next().unwrap().len();
+
+    let mut res = vec![];
+    for line in contents.lines() {
+        for (col, b) in line.bytes().enumerate() {
+            width = std::cmp::max(width, col);
+            res.push(b);
+        }
+    }
+
+    (width.try_into().unwrap(), res)
 }
