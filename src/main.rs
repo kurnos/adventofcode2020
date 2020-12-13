@@ -13,6 +13,7 @@ mod day09;
 mod day10;
 mod day11;
 mod day12;
+mod day13;
 mod infra;
 
 fn main() {
@@ -116,5 +117,13 @@ fn main() {
         day12::Day12,
         (FromFile("day12.txt"), 381),
         (FromFile("day12.txt"), 28591),
+    );
+
+    run_day(
+        day,
+        times,
+        day13::Day13,
+        (FromFile("day13.txt"), 1915),
+        (FromFile("day13.txt"), 294354277694107),
     );
 }
