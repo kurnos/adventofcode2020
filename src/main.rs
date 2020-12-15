@@ -1,4 +1,4 @@
-use infra::{run_day, FromFile};
+use infra::{run_day, FromFile, Literal};
 use std::env;
 
 mod day01;
@@ -15,6 +15,7 @@ mod day11;
 mod day12;
 mod day13;
 mod day14;
+mod day15;
 mod infra;
 
 fn main() {
@@ -134,5 +135,13 @@ fn main() {
         day14::Day14,
         (FromFile("day14.txt"), 12512013221615),
         (FromFile("day14.txt"), 3905642473893),
+    );
+
+    run_day(
+        day,
+        times,
+        day15::Day15,
+        (Literal(vec![0, 8, 15, 2, 12, 1, 4]), 289),
+        (Literal(vec![0, 8, 15, 2, 12, 1, 4]), 1505722),
     );
 }
