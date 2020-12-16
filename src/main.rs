@@ -16,6 +16,7 @@ mod day12;
 mod day13;
 mod day14;
 mod day15;
+mod day16;
 mod infra;
 
 fn main() {
@@ -143,5 +144,13 @@ fn main() {
         day15::Day15,
         (Literal(vec![0, 8, 15, 2, 12, 1, 4]), 289),
         (Literal(vec![0, 8, 15, 2, 12, 1, 4]), 1505722),
+    );
+
+    run_day(
+        day,
+        times,
+        day16::Day16,
+        (FromFile("day16.txt"), 28882),
+        (FromFile("day16.txt"), 1429779530273),
     );
 }
