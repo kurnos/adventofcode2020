@@ -36,7 +36,7 @@ impl Problem<String, String, i32, i32> for Day8 {
     }
 }
 
-fn runit(data: &Vec<I>) -> Result<i32, i32> {
+fn runit(data: &[I]) -> Result<i32, i32> {
     let mut seen = Vec::from_iter(std::iter::repeat(false).take(data.len()));
     let mut acc = 0;
     let mut i = 0;

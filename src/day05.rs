@@ -18,8 +18,7 @@ impl Problem<String, String, u16, u16> for Day5 {
         let xs: BitSet<u32> = BitSet::from_iter(contents.lines().map(parse).map(u16::into));
         (0usize..1024)
             .skip_while(|&i| !xs.contains(i))
-            .filter(|&i| !xs.contains(i))
-            .nth(0)
+            .find(|&i| !xs.contains(i))
             .unwrap() as u16
     }
 }
@@ -35,5 +34,5 @@ fn parse(spec: &str) -> u16 {
         | ((b[6] == b'B') as u16 * 8)
         | ((b[7] == b'R') as u16 * 4)
         | ((b[8] == b'R') as u16 * 2)
-        | ((b[9] == b'R') as u16 * 1)
+        | ((b[9] == b'R') as u16)
 }

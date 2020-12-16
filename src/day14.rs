@@ -60,9 +60,9 @@ impl Problem<String, String, u64, u64> for Day14 {
             let mut masks = vec![(0u64, 0u64)];
             for a in &floats {
                 let mut new_masks = vec![];
-                for i in 0..masks.len() {
-                    new_masks.push((masks[i].0 | 1 << a, masks[i].1));
-                    new_masks.push((masks[i].0, masks[i].1 | 1 << a));
+                for m in masks {
+                    new_masks.push((m.0 | 1 << a, m.1));
+                    new_masks.push((m.0, m.1 | 1 << a));
                 }
                 masks = new_masks;
             }

@@ -22,9 +22,9 @@ impl Problem<String, String, usize, u32> for Day7 {
         queue.push_back("shiny gold");
         while let Some(bag) = queue.pop_front() {
             if seen.insert(bag) {
-                containers_of
-                    .get(bag)
-                    .map(|containers| containers.iter().for_each(|c| queue.push_back(c)));
+                if let Some(containers) = containers_of.get(bag) {
+                    containers.iter().for_each(|c| queue.push_back(c));
+                }
             }
         }
         seen.len() - 1
@@ -63,7 +63,7 @@ fn parse_bags<'a>(contents: &'a str, mut visitor: impl FnMut(&'a str, u32, &'a s
                 let mut d = y.splitn(2, ' ');
                 Some((
                     d.next()?.parse::<u32>().ok()?,
-                    d.next()?.rsplitn(2, " ").nth(1)?,
+                    d.next()?.rsplitn(2, ' ').nth(1)?,
                 ))
             })
             .for_each(|(count, contained)| visitor(container, count, contained));

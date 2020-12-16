@@ -93,11 +93,7 @@ fn room_of_life(map: Vec<u8>, limit: u8, neighbours: &[[u16; 8]]) -> usize {
                 t => t,
             };
         }
-        {
-            let tmp = tock;
-            tock = tick;
-            tick = tmp;
-        }
+        std::mem::swap(&mut tick, &mut tock);
     }
     tock.into_iter().filter(|&b| b == b'#').count()
 }

@@ -58,21 +58,21 @@ fn find_mapping<'a>(
     choices: &'a [(&Constraint<'a>, Vec<usize>)],
     so_far: HashMap<usize, Constraint<'a>>,
 ) -> Option<HashMap<usize, Constraint<'a>>> {
-    if choices.len() == 0 {
+    if choices.is_empty() {
         return Some(so_far);
     }
 
     for &i in &choices[0].1 {
         if !so_far.contains_key(&i) {
             let mut new_so_far = so_far.clone();
-            new_so_far.insert(i, choices[0].0.clone());
+            new_so_far.insert(i, *choices[0].0);
             let res = find_mapping(&choices[1..], new_so_far);
             if res.is_some() {
                 return res;
             }
         }
     }
-    return None;
+    None
 }
 
 fn constraint_matches(tickets: &[Vec<u16>], constraint: &Constraint) -> Vec<usize> {
@@ -92,16 +92,16 @@ fn is_valid(c: &Constraint, n: u16) -> bool {
 fn parse(contents: &str) -> (Vec<Constraint>, Vec<u16>, Vec<Vec<u16>>) {
     let mut lines = contents.lines().peekable();
     let mut constraints = vec![];
-    while lines.peek().unwrap().len() != 0 {
+    while !lines.peek().unwrap().is_empty() {
         let (s, x) = lines
             .next()
             .unwrap()
             .splitn(2, ": ")
             .collect_tuple()
             .unwrap();
-        let (a0, x) = x.splitn(2, "-").collect_tuple().unwrap();
+        let (a0, x) = x.splitn(2, '-').collect_tuple().unwrap();
         let (b0, x) = x.splitn(2, " or ").collect_tuple().unwrap();
-        let (a1, b1) = x.splitn(2, "-").collect_tuple().unwrap();
+        let (a1, b1) = x.splitn(2, '-').collect_tuple().unwrap();
         constraints.push((
             s,
             [

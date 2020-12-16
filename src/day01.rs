@@ -25,7 +25,7 @@ fn parse_numbers(contents: String) -> Vec<u32> {
         .lines()
         .map(|x| x.parse::<u32>().unwrap())
         .collect();
-    data.sort();
+    data.sort_unstable();
     data
 }
 

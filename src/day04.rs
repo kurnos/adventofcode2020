@@ -7,7 +7,7 @@ impl Problem<String, String, usize, usize> for Day4 {
         4
     }
     fn first(contents: String) -> usize {
-        return do_it(contents, |k, _| match k {
+        do_it(contents, |k, _| match k {
             b"byr" => 0b0000001,
             b"iyr" => 0b0000010,
             b"eyr" => 0b0000100,
@@ -16,7 +16,7 @@ impl Problem<String, String, usize, usize> for Day4 {
             b"ecl" => 0b0100000,
             b"pid" => 0b1000000,
             _ => 0,
-        });
+        })
     }
     fn second(contents: String) -> usize {
         do_it(contents, |k, v| match k {
@@ -56,6 +56,7 @@ enum S<'a> {
     NewLine,
 }
 
+#[allow(clippy::many_single_char_names)]
 fn do_it<F: Fn(&[u8], &[u8]) -> u8>(contents: String, f: F) -> usize {
     let bytes = contents.as_bytes();
 

@@ -21,7 +21,7 @@ impl Problem<String, String, u32, i64> for Day13 {
 
         let x = b.iter().map(|&id| a - a % id + id).collect_vec();
         let p = x.iter().position_min_by_key(|&&x| x).unwrap();
-        &b[p] * (&x[p] - a)
+        b[p] * (x[p] - a)
     }
 
     fn second(contents: String) -> i64 {

@@ -30,10 +30,10 @@ impl Problem<String, String, usize, usize> for Day2 {
     }
 }
 
-fn parse<'a>(line: &'a str) -> (usize, usize, char, &'a str) {
-    let mut x = line.splitn(2, "-");
+fn parse(line: &str) -> (usize, usize, char, &str) {
+    let mut x = line.splitn(2, '-');
     let r1 = x.next().unwrap().parse().unwrap();
-    let mut x = x.next().unwrap().splitn(2, " ");
+    let mut x = x.next().unwrap().splitn(2, ' ');
     let r2 = x.next().unwrap().parse().unwrap();
     let mut x = x.next().unwrap().splitn(2, ": ");
     let r3 = x.next().unwrap().parse().unwrap();

@@ -11,7 +11,7 @@ impl Problem<String, String, u16, usize> for Day10 {
     fn first(contents: String) -> u16 {
         let mut data = parse(&contents);
         data.push(0);
-        data.sort();
+        data.sort_unstable();
         data.push(data[data.len() - 1] + 3);
         let mut counts = [0; 4];
         for (a, b) in data.into_iter().tuple_windows() {
@@ -22,7 +22,7 @@ impl Problem<String, String, u16, usize> for Day10 {
 
     fn second(contents: String) -> usize {
         let mut data = parse(&contents);
-        data.sort();
+        data.sort_unstable();
         let target = data[data.len() - 1] + 3;
         data.push(target);
 
