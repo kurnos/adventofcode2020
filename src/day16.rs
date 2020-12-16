@@ -4,7 +4,7 @@ use std::collections::HashMap;
 
 pub struct Day16;
 
-type Constraint<'a> = (&'a str, u16, u16, u16, u16);
+type Constraint<'a> = (&'a str, [u16; 4]);
 
 impl Problem<String, String, u64, u64> for Day16 {
     fn day() -> u8 {
@@ -12,42 +12,35 @@ impl Problem<String, String, u64, u64> for Day16 {
     }
 
     fn first(contents: String) -> u64 {
-        let (constraints, _, tickets) = parse(&contents, 20);
+        let (constraints, _, tickets) = parse(&contents);
 
-        let mut not_valid = 0;
-        for ticket in tickets {
-            for &n in &ticket {
-                if constraints.iter().all(|c| !is_valid(c, n)) {
-                    not_valid += n as u64;
-                }
-            }
-        }
-        not_valid
+        tickets
+            .into_iter()
+            .flat_map(|x| x.into_iter())
+            .filter(|&n| !constraints.iter().any(|c| is_valid(c, n)))
+            .map(|n| n as u64)
+            .sum()
     }
 
     fn second(contents: String) -> u64 {
-        const N: usize = 20;
-        let (constraints, my_ticket, tickets) = parse(&contents, N);
+        let (constraints, my_ticket, tickets) = parse(&contents);
 
         let valid_tickets = tickets
             .into_iter()
             .filter(|ticket| {
-                for &n in ticket {
-                    if constraints.iter().all(|c| !is_valid(c, n)) {
-                        return false;
-                    }
-                }
-                return true;
+                ticket
+                    .iter()
+                    .all(|&n| constraints.iter().any(|c| is_valid(c, n)))
             })
             .collect_vec();
 
         let mut choices = constraints
             .iter()
-            .map(|c| (c, fdaa(&valid_tickets, c)))
+            .map(|c| (c, constraint_matches(&valid_tickets, c)))
             .collect_vec();
         choices.sort_by_key(|x| x.1.len());
 
-        asdf2(&choices, HashMap::new())
+        find_mapping(&choices, HashMap::new())
             .unwrap()
             .into_iter()
             .map(|(i, c)| {
@@ -61,7 +54,7 @@ impl Problem<String, String, u64, u64> for Day16 {
     }
 }
 
-fn asdf2<'a>(
+fn find_mapping<'a>(
     choices: &'a [(&Constraint<'a>, Vec<usize>)],
     so_far: HashMap<usize, Constraint<'a>>,
 ) -> Option<HashMap<usize, Constraint<'a>>> {
@@ -73,7 +66,7 @@ fn asdf2<'a>(
         if !so_far.contains_key(&i) {
             let mut new_so_far = so_far.clone();
             new_so_far.insert(i, choices[0].0.clone());
-            let res = asdf2(&choices[1..], new_so_far);
+            let res = find_mapping(&choices[1..], new_so_far);
             if res.is_some() {
                 return res;
             }
@@ -82,7 +75,7 @@ fn asdf2<'a>(
     return None;
 }
 
-fn fdaa(tickets: &[Vec<u16>], constraint: &Constraint) -> Vec<usize> {
+fn constraint_matches(tickets: &[Vec<u16>], constraint: &Constraint) -> Vec<usize> {
     let mut res = vec![];
     for i in 0..tickets[0].len() {
         if tickets.iter().all(|t| is_valid(constraint, t[i])) {
@@ -93,36 +86,43 @@ fn fdaa(tickets: &[Vec<u16>], constraint: &Constraint) -> Vec<usize> {
 }
 
 fn is_valid(c: &Constraint, n: u16) -> bool {
-    n >= c.1 && n <= c.2 || n >= c.3 && n <= c.4
+    n >= c.1[0] && n <= c.1[1] || n >= c.1[2] && n <= c.1[3]
 }
 
-fn parse(contents: &str, n: usize) -> (Vec<Constraint>, Vec<u16>, Vec<Vec<u16>>) {
-    let mut lines = contents.lines();
+fn parse(contents: &str) -> (Vec<Constraint>, Vec<u16>, Vec<Vec<u16>>) {
+    let mut lines = contents.lines().peekable();
     let mut constraints = vec![];
-    for _ in 0..n {
-        let line = lines.next().unwrap();
-        let mut x = line.splitn(2, ": ");
-        let s = x.next().unwrap();
-        let mut x = x.next().unwrap().splitn(2, "-");
-        let a0 = x.next().unwrap().parse().unwrap();
-        let mut x = x.next().unwrap().splitn(2, " or ");
-        let b0 = x.next().unwrap().parse().unwrap();
-        let mut x = x.next().unwrap().splitn(2, "-");
-        let a1 = x.next().unwrap().parse().unwrap();
-        let b1 = x.next().unwrap().parse().unwrap();
-        constraints.push((s, a0, b0, a1, b1));
+    while lines.peek().unwrap().len() != 0 {
+        let (s, x) = lines
+            .next()
+            .unwrap()
+            .splitn(2, ": ")
+            .collect_tuple()
+            .unwrap();
+        let (a0, x) = x.splitn(2, "-").collect_tuple().unwrap();
+        let (b0, x) = x.splitn(2, " or ").collect_tuple().unwrap();
+        let (a1, b1) = x.splitn(2, "-").collect_tuple().unwrap();
+        constraints.push((
+            s,
+            [
+                a0.parse().unwrap(),
+                b0.parse().unwrap(),
+                a1.parse().unwrap(),
+                b1.parse().unwrap(),
+            ],
+        ));
     }
-    while lines.next() != Some("your ticket:") {}
-    let my_ticket = lines
+    let (_, _) = lines.next_tuple().unwrap();
+    let your_ticket = lines
         .next()
         .unwrap()
         .split(',')
-        .map(|d| d.parse().unwrap())
+        .map(|t| t.parse().unwrap())
+        .collect();
+    let (_, _) = lines.next_tuple().unwrap();
+    let nearby_tickets = lines
+        .map(|line| line.split(',').map(|t| t.parse().unwrap()).collect())
         .collect();
 
-    while lines.next() != Some("nearby tickets:") {}
-    let tickets = lines
-        .map(|line| line.split(',').map(|d| d.parse().unwrap()).collect())
-        .collect();
-    (constraints, my_ticket, tickets)
+    (constraints, your_ticket, nearby_tickets)
 }
