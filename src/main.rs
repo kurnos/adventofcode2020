@@ -17,6 +17,7 @@ mod day13;
 mod day14;
 mod day15;
 mod day16;
+mod day17;
 mod infra;
 
 fn main() {
@@ -152,5 +153,13 @@ fn main() {
         day16::Day16,
         (FromFile("day16.txt"), 28882),
         (FromFile("day16.txt"), 1429779530273),
+    );
+
+    run_day(
+        day,
+        times,
+        day17::Day17,
+        (FromFile("day17.txt"), 333),
+        (FromFile("day17.txt"), 2676),
     );
 }
