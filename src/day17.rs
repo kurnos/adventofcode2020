@@ -51,11 +51,11 @@ impl Problem<String, String, usize, usize> for Day17 {
                 }
             }
             for (p, m) in weights.iter() {
-                let a = (m >> 7) != 0;
+                let a = (m & 128) != 0;
                 let c = m & 127;
                 if a && !(c == 2 || c == 3) {
                     data.remove(p);
-                } else if !a && c == 3 {
+                } else if *m == 3 {
                     data.insert(*p);
                 }
             }
