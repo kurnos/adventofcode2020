@@ -1,3 +1,5 @@
+#[allow(unused_imports)]
+use infra::InputProvider;
 use infra::{run_day, FromFile, Literal};
 use std::env;
 
@@ -21,6 +23,7 @@ mod day17;
 mod day18;
 mod day19;
 mod day20;
+mod day21;
 mod infra;
 
 fn main() {
@@ -188,5 +191,16 @@ fn main() {
         day20::Day20,
         (FromFile("day20.txt"), 17148689442341),
         (FromFile("day20.txt"), 2009),
+    );
+
+    run_day(
+        day,
+        times,
+        day21::Day21,
+        (FromFile("day21.txt"), 2874),
+        (
+            FromFile("day21.txt"),
+            "gfvrr,ndkkq,jxcxh,bthjz,sgzr,mbkbn,pkkg,mjbtz".to_string(),
+        ),
     );
 }
