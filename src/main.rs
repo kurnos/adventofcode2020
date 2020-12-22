@@ -24,6 +24,7 @@ mod day18;
 mod day19;
 mod day20;
 mod day21;
+mod day22;
 mod infra;
 
 fn main() {
@@ -202,5 +203,13 @@ fn main() {
             FromFile("day21.txt"),
             "gfvrr,ndkkq,jxcxh,bthjz,sgzr,mbkbn,pkkg,mjbtz".to_string(),
         ),
+    );
+
+    run_day(
+        day,
+        times,
+        day22::Day22,
+        (FromFile("day22.txt"), 31957),
+        (FromFile("day22.txt"), 33212),
     );
 }
