@@ -1,5 +1,5 @@
 use itertools::Itertools;
-use std::collections::{HashSet, VecDeque};
+use std::{collections::VecDeque, iter::FromIterator};
 
 pub struct Day22;
 
@@ -19,8 +19,25 @@ impl crate::infra::Problem<String, String, u32, u32> for Day22 {
         let data = parse(&contents);
         let (d1, d2) = data;
 
-        score(run_recursive(d1, d2))
+        let mut pool = Vec::new();
+        score(run_recursive(&mut pool, d1, d2))
     }
+}
+
+type DequePool = Vec<VecDeque<u8>>;
+
+fn get_copy(pool: &mut DequePool, src: &VecDeque<u8>, len: u8) -> VecDeque<u8> {
+    if let Some(mut result) = pool.pop() {
+        result.clear();
+        result.extend(src.iter().take(len as usize).cloned());
+        result
+    } else {
+        VecDeque::from_iter(src.iter().take(len as usize).cloned())
+    }
+}
+
+fn return_deque(pool: &mut DequePool, deque: VecDeque<u8>) {
+    pool.push(deque);
 }
 
 #[derive(Debug, Clone)]
@@ -29,23 +46,24 @@ enum W {
     P2(VecDeque<u8>),
 }
 
-fn run_recursive(mut d1: VecDeque<u8>, mut d2: VecDeque<u8>) -> W {
-    let mut seen = HashSet::new();
-    loop {
-        if !seen.insert((d1.clone(), d2.clone())) {
+fn run_recursive(pool: &mut DequePool, mut d1: VecDeque<u8>, mut d2: VecDeque<u8>) -> W {
+    for i in 0.. {
+        if i > 1000 {
+            return_deque(pool, d2);
             return W::P1(d1);
         } else {
             let (c1, c2) = (d1.pop_front().unwrap(), d2.pop_front().unwrap());
             if (c1 as usize) <= d1.len() && (c2 as usize) <= d2.len() {
-                match run_recursive(
-                    d1.iter().take(c1 as usize).cloned().collect(),
-                    d2.iter().take(c2 as usize).cloned().collect(),
-                ) {
-                    W::P1(_) => {
+                let r1 = get_copy(pool, &d1, c1);
+                let r2 = get_copy(pool, &d2, c2);
+                match run_recursive(pool, r1, r2) {
+                    W::P1(d) => {
+                        return_deque(pool, d);
                         d1.push_back(c1);
                         d1.push_back(c2);
                     }
-                    W::P2(_) => {
+                    W::P2(d) => {
+                        return_deque(pool, d);
                         d2.push_back(c2);
                         d2.push_back(c1);
                     }
@@ -59,12 +77,15 @@ fn run_recursive(mut d1: VecDeque<u8>, mut d2: VecDeque<u8>) -> W {
             }
 
             if d1.is_empty() {
+                return_deque(pool, d1);
                 return W::P2(d2);
             } else if d2.is_empty() {
+                return_deque(pool, d2);
                 return W::P1(d1);
             }
         }
     }
+    panic!()
 }
 
 fn score(winner: W) -> u32 {
