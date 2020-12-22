@@ -1,6 +1,5 @@
 use itertools::Itertools;
 use std::collections::{HashMap, HashSet};
-use std::iter::FromIterator;
 
 pub struct Day21;
 
@@ -12,110 +11,61 @@ impl crate::infra::Problem<String, String, usize, String> for Day21 {
     fn first(contents: String) -> usize {
         let data = contents.lines().map(parse_line).collect_vec();
 
-        let all_allergens = data
-            .iter()
-            .flat_map(|(_, x)| x.iter().cloned())
+        let known_ingredients = get_choices(&data)
+            .into_iter()
+            .flat_map(|x| x.1.into_iter())
             .collect::<HashSet<_>>();
-
-        let i_by_a = all_allergens
-            .iter()
-            .map(|a| {
-                (
-                    *a,
-                    data.iter()
-                        .filter(|(_, aa)| aa.contains(a))
-                        .map(|x| HashSet::from_iter(x.0.iter().cloned()))
-                        .collect::<Vec<_>>(),
-                )
-            })
-            .collect::<HashMap<_, Vec<HashSet<&str>>>>();
-
-        let mut choices = Vec::new();
-
-        for (a, mut is) in i_by_a.into_iter() {
-            let mut x = is.pop().unwrap();
-            while let Some(z) = is.pop() {
-                x = HashSet::from_iter(x.intersection(&z).cloned());
-            }
-            choices.push((a, x));
-        }
-
-        let m = find(&choices, &mut HashMap::new()).unwrap();
-
-        let known_ingredients = m.values().cloned().collect::<HashSet<_>>();
-
-        let all_ingredients = data
-            .iter()
-            .flat_map(|(x, _)| x.iter().cloned())
+        data.into_iter()
+            .flat_map(|(x, _)| x.into_iter())
             .filter(|i| !known_ingredients.contains(i))
-            .count();
-
-        all_ingredients
+            .count()
     }
 
     fn second(contents: String) -> String {
         let data = contents.lines().map(parse_line).collect_vec();
-
-        let all_allergens = data
-            .iter()
-            .flat_map(|(_, x)| x.iter().cloned())
-            .collect::<HashSet<_>>();
-
-        let i_by_a = all_allergens
-            .iter()
-            .map(|a| {
-                (
-                    *a,
-                    data.iter()
-                        .filter(|(_, aa)| aa.contains(a))
-                        .map(|x| HashSet::from_iter(x.0.iter().cloned()))
-                        .collect::<Vec<_>>(),
-                )
-            })
-            .collect::<HashMap<_, Vec<HashSet<&str>>>>();
-
-        let mut choices = Vec::new();
-
-        for (a, mut is) in i_by_a.into_iter() {
-            let mut x = is.pop().unwrap();
-            while let Some(z) = is.pop() {
-                x = HashSet::from_iter(x.intersection(&z).cloned());
-            }
-            choices.push((a, x));
-        }
-
-        let m = find(&choices, &mut HashMap::new()).unwrap();
-
-        let known_ingredients = m.values().cloned().collect::<HashSet<_>>();
-
-        let all_ingredients = data
-            .iter()
-            .flat_map(|(x, _)| x.iter().cloned())
-            .filter(|i| !known_ingredients.contains(i))
-            .count();
-
-        dbg!(all_ingredients);
-
-        let mut m = m.into_iter().collect_vec();
-        m.sort_by_key(|x| x.0);
-        m.into_iter().map(|x| x.1).join(",")
+        let choices = get_choices(&data);
+        find(&choices, &mut HashMap::new())
+            .unwrap()
+            .into_iter()
+            .sorted_by_key(|x| x.0)
+            .map(|x| x.1)
+            .join(",")
     }
 }
 
+fn get_choices<'a>(ingredients: &[(Vec<&'a str>, Vec<&'a str>)]) -> HashMap<&'a str, Vec<&'a str>> {
+    let mut res: HashMap<&str, Vec<&str>> = HashMap::new();
+    for (ii, aa) in ingredients.iter() {
+        for &a in aa {
+            if let Some(c) = res.get_mut(a) {
+                let mut i = 0;
+                while i < c.len() {
+                    if !(ii.contains(&c[i])) {
+                        c.swap_remove(i);
+                    } else {
+                        i += 1;
+                    }
+                }
+            } else {
+                res.insert(a, ii.clone());
+            }
+        }
+    }
+    res
+}
+
 fn find<'a>(
-    choices: &[(&'a str, HashSet<&'a str>)],
+    choices: &HashMap<&'a str, Vec<&'a str>>,
     so_far: &mut HashMap<&'a str, &'a str>,
 ) -> Option<HashMap<&'a str, &'a str>> {
-    let a = choices.iter().find(|x| !so_far.contains_key(x.0));
-    if let Some(a) = a {
-        assert!(!so_far.contains_key(a.0));
-        for i in a.1.iter() {
+    if let Some((a, ii)) = choices.iter().find(|x| !so_far.contains_key(x.0)) {
+        for i in ii.iter() {
             if !so_far.values().any(|x| x == i) {
-                so_far.insert(a.0, i);
+                so_far.insert(a, i);
                 if let Some(solution) = find(choices, so_far) {
                     return Some(solution);
                 }
-                so_far.remove(a.0);
+                so_far.remove(a);
             }
         }
         None
@@ -127,7 +77,7 @@ fn find<'a>(
 fn parse_line(s: &str) -> (Vec<&str>, Vec<&str>) {
     let (a, b) = s.splitn(2, " (contains ").collect_tuple().unwrap();
 
-    let b = b.strip_suffix(")").unwrap();
+    let b = &b[0..(b.len() - 1)];
 
     (a.split(' ').collect(), b.split(", ").collect())
 }
