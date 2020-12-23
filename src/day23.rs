@@ -1,8 +1,3 @@
-use std::collections::VecDeque;
-use std::iter::FromIterator;
-
-use itertools::Itertools;
-
 pub struct Day23;
 
 impl crate::infra::Problem<&str, &str, String, u64> for Day23 {
@@ -12,82 +7,56 @@ impl crate::infra::Problem<&str, &str, String, u64> for Day23 {
 
     fn first(contents: &str) -> String {
         let data = contents.bytes().map(|b| (b - b'0') as u32);
-        let mut cups = VecDeque::from_iter(data);
 
-        for _ in 1..=100 {
-            let (c, cs) = find_dest(&mut cups).unwrap();
-            let d = dest(c, cs, 9);
-            while cups[0] != d {
-                cups.rotate_left(1);
-            }
-            let a = cups.pop_front().unwrap();
-            cups.push_front(cs[2]);
-            cups.push_front(cs[1]);
-            cups.push_front(cs[0]);
-            cups.push_front(a);
-            while cups[0] != c {
-                cups.rotate_right(1);
-            }
-            cups.rotate_left(1);
+        let after = run(data, 9, 100);
+        let mut res = vec![];
+        let mut current = 1;
+        for _ in 0..8 {
+            current = after[current as usize];
+            res.push(current as u8 + b'0');
         }
-
-        while cups[0] != 1 {
-            cups.rotate_left(1);
-        }
-        cups.pop_front();
-        let res =
-            String::from_utf8(cups.into_iter().map(|x| x as u8 + b'0').collect_vec()).unwrap();
-        res
+        String::from_utf8(res).unwrap()
     }
 
     fn second(contents: &str) -> u64 {
         const MAX: u32 = 1000000;
 
-        let data = contents.bytes().map(|b| (b - b'0') as u32).chain(10..=MAX);
-
-        let mut before = vec![0; MAX as usize + 1];
-        let mut after = vec![0; MAX as usize + 1];
-        for (a, b) in data.tuple_windows() {
-            before[b as usize] = a;
-            after[a as usize] = b;
-        }
-
-        let mut current = (contents.as_bytes()[0] - b'0') as u32;
-        after[MAX as usize] = current;
-        before[current as usize] = MAX;
-
-        for (a, &b) in after.iter().enumerate().skip(1) {
-            assert_eq!(before[b as usize], a as u32);
-        }
-        for (a, &b) in before.iter().enumerate().skip(1) {
-            assert_eq!(after[b as usize], a as u32);
-        }
-
-        for _ in 1..=10000000 {
-            let a = after[current as usize];
-            let b = after[a as usize];
-            let c = after[b as usize];
-            let dest = dest(current, [a, b, c], MAX);
-
-            let tmp = after[c as usize];
-            after[current as usize] = tmp;
-            before[tmp as usize] = current;
-
-            let tmp = after[dest as usize];
-            after[dest as usize] = a;
-            before[a as usize] = dest;
-            after[c as usize] = tmp;
-            before[tmp as usize] = c;
-
-            current = after[current as usize];
-        }
+        let after = run(
+            contents.bytes().map(|b| (b - b'0') as u32).chain(10..=MAX),
+            MAX,
+            10_000_000,
+        );
         let a = after[1];
         let b = after[a as usize];
         a as u64 * b as u64
     }
 }
 
-type Cups = VecDeque<u32>;
+fn run(mut data: impl Iterator<Item = u32>, max: u32, times: usize) -> Vec<u32> {
+    let mut after = vec![0; data.size_hint().1.unwrap() + 1];
+    let first = data.next().unwrap();
+    let mut current = first;
+    for next in data {
+        after[current as usize] = next;
+        current = next;
+    }
+    after[current as usize] = first;
+    current = first;
+
+    for _ in 1..=times {
+        let a = after[current as usize];
+        let b = after[a as usize];
+        let c = after[b as usize];
+        let dest = dest(current, [a, b, c], max);
+
+        after[current as usize] = after[c as usize];
+        after[c as usize] = after[dest as usize];
+        after[dest as usize] = a;
+
+        current = after[current as usize];
+    }
+    after
+}
 
 fn dest(c: u32, cs: [u32; 3], max: u32) -> u32 {
     let mut d = c - 1;
@@ -101,13 +70,4 @@ fn dest(c: u32, cs: [u32; 3], max: u32) -> u32 {
         };
     }
     d
-}
-
-fn find_dest(cups: &mut Cups) -> Option<(u32, [u32; 3])> {
-    let res = (
-        cups.pop_front()?,
-        [cups.pop_front()?, cups.pop_front()?, cups.pop_front()?],
-    );
-    cups.push_front(res.0);
-    Some(res)
 }
