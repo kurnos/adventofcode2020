@@ -1,6 +1,5 @@
 use crate::infra::Problem;
 use itertools::iproduct;
-use nalgebra::{Point3, Point4};
 use std::collections::{HashMap, HashSet};
 
 pub struct Day17;
@@ -11,8 +10,8 @@ impl Problem<String, String, usize, usize> for Day17 {
     }
 
     fn first(contents: String) -> usize {
-        let mut data: HashSet<Point3<i8>> = parse(&contents)
-            .map(|(x, y)| Point3::new(x as i8, y as i8, 0))
+        let mut data: HashSet<[i8; 3]> = parse(&contents)
+            .map(|(x, y)| [x as i8, y as i8, 0])
             .collect();
 
         let mut weights = HashMap::new();
@@ -38,8 +37,8 @@ impl Problem<String, String, usize, usize> for Day17 {
     }
 
     fn second(contents: String) -> usize {
-        let mut data: HashSet<Point4<i8>> = parse(&contents)
-            .map(|(x, y)| Point4::new(x as i8, y as i8, 0, 0))
+        let mut data: HashSet<[i8; 4]> = parse(&contents)
+            .map(|(x, y)| [x as i8, y as i8, 0, 0])
             .collect();
 
         let mut weights = HashMap::new();
@@ -73,16 +72,16 @@ fn parse<'a>(contents: &'a str) -> impl Iterator<Item = (usize, usize)> + 'a {
         .filter_map(|(p, b)| if b == b'#' { Some(p) } else { None })
 }
 
-fn ns3(p: Point3<i8>) -> impl Iterator<Item = Point3<i8>> {
+fn ns3(p: [i8; 3]) -> impl Iterator<Item = [i8; 3]> {
     let x = &[0, 1, -1];
     iproduct!(x, x, x)
         .skip(1)
-        .map(move |(&x, &y, &z)| Point3::new(p.x + x, p.y + y, p.z + z))
+        .map(move |(&x, &y, &z)| [p[0] + x, p[1] + y, p[2] + z])
 }
 
-fn ns4(p: Point4<i8>) -> impl Iterator<Item = Point4<i8>> {
+fn ns4(p: [i8; 4]) -> impl Iterator<Item = [i8; 4]> {
     let x = &[0i8, 1, -1];
     iproduct!(x, x, x, x)
         .skip(1)
-        .map(move |(&x, &y, &z, &w)| Point4::new(p.x + x, p.y + y, p.z + z, p.w + w))
+        .map(move |(&x, &y, &z, &w)| [p[0] + x, p[1] + y, p[2] + z, p[3] + w])
 }
