@@ -1,5 +1,4 @@
 use crate::infra::Problem;
-use crate::parse;
 use itertools::Itertools;
 use std::collections::HashMap;
 
@@ -19,8 +18,12 @@ impl Problem<String, String, u64, u64> for Day14 {
                 let m = y.next().unwrap();
                 let one_m = m.bytes().fold(0, |a, b| a << 1 | ((b == b'1') as u64));
                 let zero_m = m.bytes().fold(0, |a, b| a << 1 | ((b != b'0') as u64));
-                let xs: Vec<(u32, u64)> =
-                    y.map(|x| parse!(r"mem\[(.+)\] = (.*)", x, 2)).collect_vec();
+                let xs: Vec<(u32, u64)> = y
+                    .map(|x| {
+                        let (a, b) = x["mem[".len()..].splitn(2, "] = ").collect_tuple().unwrap();
+                        (a.parse().unwrap(), b.parse().unwrap())
+                    })
+                    .collect_vec();
                 (one_m, zero_m, xs)
             })
             .collect_vec();
@@ -49,8 +52,12 @@ impl Problem<String, String, u64, u64> for Day14 {
                     .filter(|b| b.1 == b'X')
                     .map(|x| x.0)
                     .collect_vec();
-                let xs: Vec<(u64, u64)> =
-                    y.map(|x| parse!(r"mem\[(.+)\] = (.*)", x, 2)).collect_vec();
+                let xs: Vec<(u64, u64)> = y
+                    .map(|x| {
+                        let (a, b) = x["mem[".len()..].splitn(2, "] = ").collect_tuple().unwrap();
+                        (a.parse().unwrap(), b.parse().unwrap())
+                    })
+                    .collect_vec();
                 (one_m, floating, xs)
             })
             .collect_vec();
