@@ -237,6 +237,6 @@ fn main() {
         times,
         day25::Day25,
         (FromFile("day25.txt"), 16311885),
-        (FromFile("day25.txt"), "That's all folks"),
+        (Literal(None), None),
     );
 }
