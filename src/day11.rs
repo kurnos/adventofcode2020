@@ -3,6 +3,9 @@ use std::convert::TryInto;
 
 pub struct Day11;
 
+const FLOOR: i8 = 32;
+const TAKEN: i8 = 16;
+
 impl Problem<String, String, usize, usize> for Day11 {
     fn day() -> u8 {
         11
@@ -34,10 +37,10 @@ impl Problem<String, String, usize, usize> for Day11 {
 
                 if 0 <= x && x < dim && 0 <= y && y < dim {
                     match map[x as usize + y as usize * dim as usize] {
-                        b'#' | b'L' => {
+                        FLOOR => {}
+                        _ => {
                             return x as u16 + y as u16 * dim as u16;
                         }
-                        _ => {}
                     }
                 } else {
                     return 0xffff;
@@ -48,7 +51,7 @@ impl Problem<String, String, usize, usize> for Day11 {
     }
 }
 
-fn neighbour_list(map: &[u8], can_see_in_dir: impl Fn(usize, i8, i8) -> u16) -> Vec<[u16; 8]> {
+fn neighbour_list(map: &[i8], can_see_in_dir: impl Fn(usize, i8, i8) -> u16) -> Vec<[u16; 8]> {
     (0..map.len())
         .map(|pos| {
             [
@@ -65,47 +68,44 @@ fn neighbour_list(map: &[u8], can_see_in_dir: impl Fn(usize, i8, i8) -> u16) -> 
         .collect()
 }
 
-fn count(map: &[u8], neighbours: &[u16; 8]) -> u8 {
-    let mut res = 0;
-    for &p in neighbours {
-        if p != 0xffff && map[p as usize] == b'#' {
-            res += 1;
+fn room_of_life(mut counts: Vec<i8>, limit: i8, neighbours: &[[u16; 8]]) -> usize {
+    let mut queue = vec![];
+    loop {
+        for i in queue.drain(..) {
+            if counts[i] & TAKEN != 0 {
+                for &n in &neighbours[i] {
+                    if n != 0xffff {
+                        counts[n as usize] += 1;
+                    }
+                }
+            } else {
+                for &n in &neighbours[i] {
+                    if n != 0xffff {
+                        counts[n as usize] -= 1;
+                    }
+                }
+            }
+        }
+        for (i, c) in counts.iter_mut().enumerate() {
+            if *c == 0 || (*c & TAKEN != 0 && *c & (TAKEN - 1) >= limit) {
+                queue.push(i);
+                *c ^= TAKEN;
+            }
+        }
+        if queue.is_empty() {
+            break counts.into_iter().filter(|&b| b & 16 != 0).count();
         }
     }
-    res
 }
 
-fn room_of_life(map: Vec<u8>, limit: u8, neighbours: &[[u16; 8]]) -> usize {
-    let mut changed = true;
-    let (mut tick, mut tock) = (map.clone(), map);
-    while changed {
-        changed = false;
-        for (p, &b) in tick.iter().enumerate() {
-            tock[p as usize] = match b {
-                b'L' if count(&tick, &neighbours[p]) == 0 => {
-                    changed = true;
-                    b'#'
-                }
-                b'#' if count(&tick, &neighbours[p]) >= limit => {
-                    changed = true;
-                    b'L'
-                }
-                t => t,
-            };
-        }
-        std::mem::swap(&mut tick, &mut tock);
-    }
-    tock.into_iter().filter(|&b| b == b'#').count()
-}
-
-fn parse(contents: &str) -> (i8, Vec<u8>) {
+fn parse(contents: &str) -> (i8, Vec<i8>) {
     let mut width = contents.lines().next().unwrap().len();
 
     let mut res = vec![];
     for line in contents.lines() {
         for (col, b) in line.bytes().enumerate() {
             width = std::cmp::max(width, col);
-            res.push(b);
+            res.push(if b == b'.' { FLOOR } else { 0 });
         }
     }
 
