@@ -1,5 +1,5 @@
 use itertools::Itertools;
-use std::{collections::VecDeque, iter::FromIterator};
+use std::collections::VecDeque;
 
 pub struct Day22;
 
@@ -32,7 +32,7 @@ fn get_copy(pool: &mut DequePool, src: &VecDeque<u8>, len: u8) -> VecDeque<u8> {
         result.extend(src.iter().take(len as usize).cloned());
         result
     } else {
-        VecDeque::from_iter(src.iter().take(len as usize).cloned())
+        src.iter().take(len as usize).cloned().collect()
     }
 }
 

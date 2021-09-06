@@ -41,7 +41,7 @@ impl Problem<String, String, usize, usize> for Day19 {
                     let mut x = matches(s, &rules, 31);
                     let mut c31 = 1;
                     while let Some(s) = x {
-                        if s == "" {
+                        if s.is_empty() {
                             return true;
                         } else if c31 == c42 {
                             break;

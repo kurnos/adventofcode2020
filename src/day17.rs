@@ -64,7 +64,7 @@ impl Problem<String, String, usize, usize> for Day17 {
     }
 }
 
-fn parse<'a>(contents: &'a str) -> impl Iterator<Item = (usize, usize)> + 'a {
+fn parse(contents: &str) -> impl Iterator<Item = (usize, usize)> + '_ {
     contents
         .lines()
         .enumerate()

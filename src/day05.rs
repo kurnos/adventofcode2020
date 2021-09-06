@@ -1,7 +1,6 @@
 use crate::infra::Problem;
 use bit_set::BitSet;
 use std::convert::TryInto;
-use std::iter::FromIterator;
 
 pub struct Day5;
 
@@ -15,7 +14,7 @@ impl Problem<String, String, u16, u16> for Day5 {
     }
 
     fn second(contents: String) -> u16 {
-        let xs: BitSet<u32> = BitSet::from_iter(contents.lines().map(parse).map(u16::into));
+        let xs: BitSet<u32> = contents.lines().map(parse).map(u16::into).collect();
         (0usize..1024)
             .skip_while(|&i| !xs.contains(i))
             .find(|&i| !xs.contains(i))

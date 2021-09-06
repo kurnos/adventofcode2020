@@ -1,5 +1,4 @@
 use crate::infra::Problem;
-use std::iter::FromIterator;
 
 pub struct Day8;
 
@@ -20,7 +19,7 @@ impl Problem<String, String, i32, i32> for Day8 {
                 I::Jmp(d) => I::Nop(d),
                 I::Acc(d) => I::Acc(d),
             }
-        };
+        }
 
         for i in 0..data.len() {
             if let I::Acc(_) = data[i] {
@@ -37,7 +36,7 @@ impl Problem<String, String, i32, i32> for Day8 {
 }
 
 fn runit(data: &[I]) -> Result<i32, i32> {
-    let mut seen = Vec::from_iter(std::iter::repeat(false).take(data.len()));
+    let mut seen = std::iter::repeat(false).take(data.len()).collect::<Vec<_>>();
     let mut acc = 0;
     let mut i = 0;
 

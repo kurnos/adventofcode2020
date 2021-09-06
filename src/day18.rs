@@ -71,7 +71,7 @@ fn eval_op(stack: &mut Vec<u64>, t: char) {
     })
 }
 
-fn tokenize<'a>(mut s: &'a str) -> impl Iterator<Item = T> + 'a {
+fn tokenize(mut s: &str) -> impl Iterator<Item = T> + '_ {
     std::iter::from_fn(move || {
         while !s.is_empty() {
             let c = s.chars().next().unwrap();
