@@ -2,11 +2,7 @@ use crate::infra::Problem;
 
 pub struct Day15;
 
-impl Problem<Vec<u32>, Vec<u32>, u32, u32> for Day15 {
-    fn day() -> u8 {
-        15
-    }
-
+impl Problem<Vec<u32>, Vec<u32>, u32, u32, 15> for Day15 {
     fn first(contents: Vec<u32>) -> u32 {
         run_with(&contents, 2020)
     }

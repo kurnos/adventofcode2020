@@ -2,11 +2,7 @@ use crate::infra::Problem;
 
 pub struct Day9;
 
-impl Problem<String, String, u64, u64> for Day9 {
-    fn day() -> u8 {
-        9
-    }
-
+impl Problem<String, String, u64, u64, 9> for Day9 {
     fn first(contents: String) -> u64 {
         let size = 25;
         let data = parse(&contents);

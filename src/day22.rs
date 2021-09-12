@@ -3,11 +3,7 @@ use std::collections::VecDeque;
 
 pub struct Day22;
 
-impl crate::infra::Problem<String, String, u32, u32> for Day22 {
-    fn day() -> u8 {
-        22
-    }
-
+impl crate::infra::Problem<String, String, u32, u32, 22> for Day22 {
     fn first(contents: String) -> u32 {
         let data = parse(&contents);
         let (d1, d2) = data;

@@ -3,11 +3,7 @@ use itertools::Itertools;
 
 pub struct Day10;
 
-impl Problem<String, String, u16, usize> for Day10 {
-    fn day() -> u8 {
-        10
-    }
-
+impl Problem<String, String, u16, usize, 10> for Day10 {
     fn first(contents: String) -> u16 {
         let mut data = parse(&contents);
         data.push(0);

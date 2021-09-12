@@ -2,10 +2,7 @@ use crate::infra::Problem;
 
 pub struct Day4;
 
-impl Problem<String, String, usize, usize> for Day4 {
-    fn day() -> u8 {
-        4
-    }
+impl Problem<String, String, usize, usize, 4> for Day4 {
     fn first(contents: String) -> usize {
         do_it(contents, |k, _| match k {
             b"byr" => 0b0000001,

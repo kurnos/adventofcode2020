@@ -4,11 +4,7 @@ use std::convert::TryInto;
 
 pub struct Day5;
 
-impl Problem<String, String, u16, u16> for Day5 {
-    fn day() -> u8 {
-        5
-    }
-
+impl Problem<String, String, u16, u16, 5> for Day5 {
     fn first(contents: String) -> u16 {
         contents.lines().map(parse).max().unwrap()
     }

@@ -2,10 +2,7 @@ use crate::infra;
 
 pub struct Day1;
 
-impl infra::Problem<String, String, u32, u32> for Day1 {
-    fn day() -> u8 {
-        1
-    }
+impl infra::Problem<String, String, u32, u32, 1> for Day1 {
     fn first(contents: String) -> u32 {
         find_target(&parse_numbers(contents), 2020).unwrap()
     }

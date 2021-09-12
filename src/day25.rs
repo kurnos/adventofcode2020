@@ -4,11 +4,7 @@ use crate::infra::Problem;
 
 pub struct Day25;
 
-impl Problem<String, Option<()>, u64, Option<()>> for Day25 {
-    fn day() -> u8 {
-        25
-    }
-
+impl Problem<String, Option<()>, u64, Option<()>, 25> for Day25 {
     fn first(contents: String) -> u64 {
         let (t1, t2) = contents
             .lines()

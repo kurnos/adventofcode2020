@@ -3,11 +3,7 @@ use std::collections::{HashMap, HashSet};
 
 pub struct Day24;
 
-impl Problem<String, String, usize, usize> for Day24 {
-    fn day() -> u8 {
-        24
-    }
-
+impl Problem<String, String, usize, usize, 24> for Day24 {
     fn first(contents: String) -> usize {
         make_board(contents).len()
     }

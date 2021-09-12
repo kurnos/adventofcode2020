@@ -4,11 +4,7 @@ use itertools::Itertools;
 
 pub struct Day19;
 
-impl Problem<String, String, usize, usize> for Day19 {
-    fn day() -> u8 {
-        19
-    }
-
+impl Problem<String, String, usize, usize, 19> for Day19 {
     fn first(contents: String) -> usize {
         let (a, b) = contents.split("\n\n").collect_tuple().unwrap();
         let rules = a

@@ -6,11 +6,7 @@ pub struct Day11;
 const FLOOR: i8 = 32;
 const TAKEN: i8 = 16;
 
-impl Problem<String, String, usize, usize> for Day11 {
-    fn day() -> u8 {
-        11
-    }
-
+impl Problem<String, String, usize, usize, 11> for Day11 {
     fn first(contents: String) -> usize {
         let (dim, map) = parse(&contents);
         let neighbours = neighbour_list(&map, |pos: usize, dx: i8, dy: i8| {

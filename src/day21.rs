@@ -3,11 +3,7 @@ use std::collections::{HashMap, HashSet};
 
 pub struct Day21;
 
-impl crate::infra::Problem<String, String, usize, String> for Day21 {
-    fn day() -> u8 {
-        21
-    }
-
+impl crate::infra::Problem<String, String, usize, String, 21> for Day21 {
     fn first(contents: String) -> usize {
         let data = contents.lines().map(parse_line).collect_vec();
 

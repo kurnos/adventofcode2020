@@ -4,11 +4,7 @@ use std::collections::{HashMap, HashSet};
 
 pub struct Day20;
 
-impl Problem<String, String, u128, usize> for Day20 {
-    fn day() -> u8 {
-        20
-    }
-
+impl Problem<String, String, u128, usize, 20> for Day20 {
     fn first(contents: String) -> u128 {
         let tiles = contents
             .split("\n\n")

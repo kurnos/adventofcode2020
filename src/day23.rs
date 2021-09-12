@@ -1,10 +1,6 @@
 pub struct Day23;
 
-impl crate::infra::Problem<&str, &str, String, u64> for Day23 {
-    fn day() -> u8 {
-        23
-    }
-
+impl crate::infra::Problem<&str, &str, String, u64, 23> for Day23 {
     fn first(contents: &str) -> String {
         let data = contents.bytes().map(|b| (b - b'0') as u32);
 

@@ -4,11 +4,7 @@ use std::collections::{HashMap, HashSet};
 
 pub struct Day17;
 
-impl Problem<String, String, usize, usize> for Day17 {
-    fn day() -> u8 {
-        17
-    }
-
+impl Problem<String, String, usize, usize, 17> for Day17 {
     fn first(contents: String) -> usize {
         let mut data: HashSet<[i8; 3]> = parse(&contents)
             .map(|(x, y)| [x as i8, y as i8, 0])

@@ -3,11 +3,7 @@ use std::collections::{HashMap, HashSet, VecDeque};
 
 pub struct Day7;
 
-impl Problem<String, String, usize, u32> for Day7 {
-    fn day() -> u8 {
-        7
-    }
-
+impl Problem<String, String, usize, u32, 7> for Day7 {
     fn first(contents: String) -> usize {
         let mut containers_of: HashMap<&str, Vec<&str>> = HashMap::new();
         parse_bags(&contents, |container, _, contained| {

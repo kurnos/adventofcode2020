@@ -6,11 +6,7 @@ pub struct Day16;
 
 type Constraint<'a> = (&'a str, [u16; 4]);
 
-impl Problem<String, String, u64, u64> for Day16 {
-    fn day() -> u8 {
-        16
-    }
-
+impl Problem<String, String, u64, u64, 16> for Day16 {
     fn first(contents: String) -> u64 {
         let (constraints, _, tickets) = parse(&contents);
 

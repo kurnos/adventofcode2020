@@ -2,11 +2,7 @@ use crate::infra::Problem;
 
 pub struct Day8;
 
-impl Problem<String, String, i32, i32> for Day8 {
-    fn day() -> u8 {
-        8
-    }
-
+impl Problem<String, String, i32, i32, 8> for Day8 {
     fn first(contents: String) -> i32 {
         runit(&parse(&contents)).unwrap_err()
     }
